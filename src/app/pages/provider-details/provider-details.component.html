@@ -1,0 +1,263 @@
+
+<section class="details-page" *ngIf="provider; else missing">
+  <div class="page-watermark" aria-hidden="true">FixNear</div>
+  <a routerLink="/providers" class="back-link">
+    ← Back to providers
+  </a>
+
+  <div class="details-layout">
+    <div class="profile-col">
+      <div class="profile-image">
+        <img [src]="providerProfileImage" [alt]="provider.name + ' - ' + provider.category" loading="lazy" (error)="onProfileImageError($event)">
+        <span class="availability" [class.off]="!provider.available">
+          {{ provider.available ? 'Available now' : 'Currently unavailable' }}
+        </span>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-head">
+          <div>
+            <div class="profile-badges">
+              <span class="card-category">{{ provider.category }}</span>
+              <span class="card-category extra" *ngFor="let cat of extraCategories">
+                {{ cat }}
+              </span>
+              <span class="verified-pill">✓ Verified pro</span>
+            </div>
+            <h1>{{ provider.name }}</h1>
+          </div>
+          <div class="profile-actions">
+            <button type="button" class="icon-btn" (click)="toggleFavorite($event)"
+                    [class.on]="isFavorite()"
+                    [attr.aria-label]="isFavorite() ? 'Remove from favorites' : 'Save to favorites'">
+              {{ isFavorite() ? '♥' : '♡' }}
+            </button>
+            <button type="button" class="icon-btn" (click)="shareProvider()"
+                    aria-label="Share this profile">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="profile-meta">
+          <div class="meta-item">
+            <span class="meta-icon">📍</span>
+            <a class="meta-location" [href]="mapUrl(provider.area)"
+               target="_blank" rel="noopener"
+               [attr.aria-label]="'Open ' + provider.area + ' in maps'">{{ provider.area }}</a>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">★</span>
+            {{ provider.rating }} rating
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">📅</span>
+            {{ provider.experience }} years exp
+          </div>
+        </div>
+
+        <p class="profile-desc">{{ provider.description }}</p>
+
+        <div class="price-box">
+          <div>
+            <span class="price-label">Starting from</span>
+            <strong class="price-value">₹{{ displayPrice }}</strong>
+          </div>
+          <span class="price-note">Final charges may vary</span>
+        </div>
+      </div>
+
+      <div class="services-card" *ngIf="provider.services?.length">
+        <div class="services-card-head">
+          <div>
+            <span class="services-eyebrow">What's available</span>
+            <h3>Services offered</h3>
+          </div>
+          <span class="services-count">
+            {{ provider.services?.length }}
+            {{ provider.services?.length === 1 ? 'service' : 'services' }}
+          </span>
+        </div>
+        <ul class="services-list">
+          <li *ngFor="let service of provider.services">
+            <div class="service-info">
+              <span class="service-cat">{{ service.category }}</span>
+              <strong>{{ formatService(service.serviceName) }}</strong>
+            </div>
+            <span class="service-price">₹{{ service.basePrice }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="trust-card">
+        <div class="trust-photo">
+          <img src="assets/services/carpenter-pro.jpg"
+               alt="Professional at work">
+        </div>
+        <h3>Why book with us?</h3>
+        <ul>
+          <li><span>✓</span> Background-verified professionals</li>
+          <li><span>✓</span> Transparent, upfront pricing</li>
+          <li><span>✓</span> Secure payment on completion</li>
+          <li><span>✓</span> Free rescheduling support</li>
+        </ul>
+      </div>
+    </div>
+
+    <form class="booking-col" id="booking-form" (ngSubmit)="bookService()">
+      <div class="booking-card">
+        <span class="booking-tag">⚡ Usually confirms within 15 minutes</span>
+        <h2>Request an appointment</h2>
+        <p class="booking-sub">Choose your preferred date and describe what you need.</p>
+
+        <div class="form-group" *ngIf="provider.services?.length">
+          <label>Select service</label>
+          <select name="providerServiceId" [(ngModel)]="selectedServiceId">
+            <option *ngFor="let service of provider.services" [ngValue]="service.id">
+              {{ formatService(service.serviceName) }} — ₹{{ service.basePrice }}
+            </option>
+          </select>
+          <div class="service-preview" *ngIf="selectedService">
+            <img class="service-preview-img" [src]="selectedServiceImage"
+                 [alt]="selectedService.serviceName" loading="lazy" (error)="onServiceImageError($event)">
+            <div class="service-preview-body">
+              <span class="service-preview-label">You're booking</span>
+              <strong>{{ formatService(selectedService.serviceName) }}</strong>
+              <span class="service-preview-cat">{{ selectedService.category }}</span>
+              <small class="service-desc" *ngIf="selectedService.description">
+                {{ selectedService.description }}
+              </small>
+            </div>
+            <span class="service-preview-price">₹{{ selectedService.basePrice }}</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Preferred date</label>
+          <input type="date" name="date" [(ngModel)]="date"
+                 [min]="today" required
+                 [class.invalid]="invalid('date')">
+          <small class="field-error" *ngIf="invalid('date')">Please pick a date</small>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label for="bookingAddress">Service location</label>
+            <button type="button" class="locate-btn" (click)="useCurrentLocation()"
+                    [disabled]="locationStatus === 'locating'">
+              <span aria-hidden="true">📍</span>
+              {{ locationStatus === 'locating' ? 'Locating…' : 'Use my location' }}
+            </button>
+          </div>
+          <input id="bookingAddress" name="address" [(ngModel)]="address"
+                 placeholder="Enter your full address" required
+                 [class.invalid]="invalid('address')">
+          <small class="field-hint" *ngIf="locationStatus === 'found'">
+            Exact GPS location saved. Add a flat number or landmark for the pro.
+          </small>
+          <small class="field-error" *ngIf="invalid('address')">Please enter your address</small>
+          <div class="location-actions" *ngIf="address.trim()">
+            <a class="location-map-link" [href]="bookingMapUrl()"
+               target="_blank" rel="noopener">
+              🗺️ {{ hasExactLocation ? 'Preview exact pin on the map' : 'Preview this location on the map' }}
+            </a>
+            <span class="exact-pin-badge" *ngIf="hasExactLocation">✓ Exact GPS pin</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Describe your problem</label>
+          <textarea name="problem" [(ngModel)]="problem"
+                    rows="4" maxlength="500"
+                    placeholder="Tell us what needs to be repaired or installed..."
+                    required
+                    [class.invalid]="invalid('problem')"></textarea>
+          <div class="field-meta">
+            <small class="field-error" *ngIf="invalid('problem')">Please describe the issue</small>
+            <span class="char-count" [class.warn]="problemLength > problemMax"
+                  aria-live="polite">{{ problemLength }}/{{ problemMax }}</span>
+          </div>
+        </div>
+
+        <div class="form-error" *ngIf="message">
+          <span>⚠</span> {{ message }}
+        </div>
+
+        <div class="form-success" *ngIf="bookingSuccess">
+          <span>✓</span> Booking request sent! Redirecting to My Bookings…
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg book-btn"
+                [disabled]="!provider.available || bookingSuccess">
+          {{ bookingSuccess ? 'Request sent ✓' : (provider.available ? 'Request booking' : 'Provider unavailable') }}
+        </button>
+
+        <p class="booking-note">
+          You won't be charged yet. The provider will confirm your request.
+        </p>
+
+        <div class="booking-perks">
+          <span><span>✓</span> No advance payment</span>
+          <span><span>✓</span> Free rescheduling</span>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="reviews-section" *ngIf="reviews.length">
+    <div class="reviews-header">
+      <div>
+        <span class="eyebrow">Reviews</span>
+        <h2>What customers say</h2>
+      </div>
+      <div class="reviews-summary">
+        <strong>{{ avgReviewRating() | number:'1.1-1' }}</strong>
+        <span class="summary-stars">★</span>
+        <span class="summary-count">({{ reviews.length }} reviews)</span>
+      </div>
+    </div>
+
+    <div class="reviews-grid">
+      <article class="review-card" *ngFor="let r of reviews">
+        <div class="review-top">
+          <div class="review-avatar">{{ r.author.charAt(0) }}</div>
+          <div>
+            <strong>{{ r.author }}</strong>
+            <span class="review-date">{{ r.date }}</span>
+          </div>
+          <div class="review-stars">{{ '★'.repeat(r.rating) }}{{ '☆'.repeat(5 - r.rating) }}</div>
+        </div>
+        <p class="review-comment">{{ r.comment }}</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="mobile-book-bar" *ngIf="provider">
+    <div class="bar-price">
+      <small>Starting from</small>
+      <strong>₹{{ displayPrice }}</strong>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="scrollToBooking()"
+            [disabled]="!provider.available">
+      {{ provider.available ? 'Book now' : 'Unavailable' }}
+    </button>
+  </div>
+</section>
+
+<ng-template #missing>
+  <section class="details-page">
+    <div class="empty-state">
+      <div class="empty-icon">😕</div>
+      <h2>Provider not found</h2>
+      <p>The provider you're looking for doesn't exist or has been removed.</p>
+      <a routerLink="/providers" class="btn btn-primary">Browse providers</a>
+    </div>
+  </section>
+</ng-template>

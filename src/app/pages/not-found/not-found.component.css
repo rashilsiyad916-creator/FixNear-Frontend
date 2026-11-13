@@ -1,0 +1,102 @@
+﻿.nf-page {
+  position: relative;
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 70px 20px;
+  background:
+    radial-gradient(620px 360px at 84% 12%, rgba(47, 125, 83, 0.14), transparent 68%),
+    radial-gradient(540px 340px at 12% 88%, rgba(31, 77, 58, 0.16), transparent 70%),
+    linear-gradient(160deg, var(--primary-50), #fffdf8 58%);
+  overflow: hidden;
+}
+
+.nf-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(19, 38, 28, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(19, 38, 28, 0.025) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse 70% 65% at 50% 45%, black, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 45%, black, transparent 80%);
+  pointer-events: none;
+}
+
+.nf-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+}
+
+.nf-badge {
+  display: inline-block;
+  padding: 5px 13px;
+  background: #fffdf8;
+  border: 1px solid rgba(31, 77, 58, 0.25);
+  border-radius: 50px;
+  color: var(--primary-deep);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  box-shadow: 0 6px 16px -12px rgba(19, 38, 28, 0.5);
+}
+
+.nf-code {
+  font-size: clamp(96px, 18vw, 150px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -6px;
+  background: linear-gradient(120deg, #1f4d3a 0%, #2f7d53 45%, #2f7d53 80%, #e8792b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 6px 0 2px;
+}
+
+.nf-inner h1 {
+  font-size: 29px;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -0.8px;
+  margin-bottom: 10px;
+}
+
+.nf-inner p {
+  color: var(--gray);
+  font-size: 14.5px;
+  margin-bottom: 26px;
+}
+
+.nf-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.nf-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(230, 222, 204, 0.9);
+  font-size: 12.5px;
+  color: var(--slate-light);
+}
+
+.nf-links a {
+  color: var(--slate);
+  font-weight: 600;
+}
+
+.nf-links a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}

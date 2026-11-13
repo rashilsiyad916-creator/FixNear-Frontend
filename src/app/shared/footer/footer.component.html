@@ -1,0 +1,48 @@
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a routerLink="/" class="brand">
+          <span class="brand-icon">F</span>
+          FixNear<span class="dot">.</span>
+        </a>
+        <p class="tagline">Your neighbourhood, taken care of. Trusted local pros for every job — big, small, or somewhere in between.</p>
+        <div class="socials">
+          <a href="#" aria-label="Twitter">𝕏</a>
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="Instagram">in</a>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <div class="link-group">
+          <h4>Platform</h4>
+          <a routerLink="/">Home</a>
+          <a routerLink="/providers">Find Services</a>
+          <a routerLink="/register">Become a provider</a>
+        </div>
+        <div class="link-group">
+          <h4>Account</h4>
+          <a routerLink="/login">Log in</a>
+          <a routerLink="/register">Create account</a>
+          <a routerLink="/my-bookings">My Bookings</a>
+        </div>
+        <div class="link-group">
+          <h4>Services</h4>
+          <a routerLink="/providers" [queryParams]="{category: 'Electrician'}">Electricians</a>
+          <a routerLink="/providers" [queryParams]="{category: 'Plumber'}">Plumbers</a>
+          <a routerLink="/providers" [queryParams]="{category: 'Mechanic'}">Mechanics</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; {{ year }} FixNear. All rights reserved.</p>
+      <div class="bottom-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+  </div>
+</footer>

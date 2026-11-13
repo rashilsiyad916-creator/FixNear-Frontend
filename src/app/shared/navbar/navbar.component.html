@@ -1,0 +1,89 @@
+<nav class="navbar" [class.scrolled]="scrolled">
+  <div class="top-strip">
+    <div class="top-strip-inner">
+      <div class="strip-points">
+        <span><span class="strip-check">✓</span> Background-checked professionals</span>
+        <span><span class="strip-check">✓</span> Transparent, upfront pricing</span>
+        <span><span class="strip-check">✓</span> Booking is always free</span>
+      </div>
+      <div class="strip-area">📍 Proudly serving Tirur, Kottakkal &amp; Malappuram</div>
+    </div>
+  </div>
+
+  <div class="navbar-inner">
+    <a routerLink="/" class="brand" aria-label="FixNear home">
+      <span class="brand-icon">F</span>
+      <span class="brand-text">FixNear<span class="dot">.</span></span>
+    </a>
+
+    <div class="nav-links">
+      <a routerLink="/" routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a routerLink="/providers" routerLinkActive="active">Find Services</a>
+      <ng-container *ngIf="authService.currentUser$ | async as user">
+        <ng-container *ngIf="user.role === 'Admin'; else nonAdminNav">
+          <a routerLink="/admin" routerLinkActive="active">Category approvals</a>
+        </ng-container>
+        <ng-template #nonAdminNav>
+          <ng-container *ngIf="user.role === 'Provider'; else customerNav">
+            <a routerLink="/provider" routerLinkActive="active">Provider studio</a>
+          </ng-container>
+          <ng-template #customerNav>
+            <a routerLink="/my-bookings" routerLinkActive="active">My Bookings</a>
+            <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+          </ng-template>
+        </ng-template>
+      </ng-container>
+    </div>
+
+    <div class="nav-right">
+      <ng-container *ngIf="authService.currentUser$ | async as user; else loggedOut">
+        <div class="user-menu">
+          <div class="avatar">{{ user.fullName.charAt(0) }}</div>
+          <span class="user-name">{{ user.fullName }}</span>
+          <button class="btn btn-ghost btn-sm" (click)="logout()">Logout</button>
+        </div>
+      </ng-container>
+
+      <ng-template #loggedOut>
+        <a routerLink="/login" class="btn btn-ghost btn-sm">Log in</a>
+        <a routerLink="/register" class="btn btn-primary btn-sm">Get started</a>
+      </ng-template>
+
+      <button class="menu-toggle" (click)="menuOpen = !menuOpen"
+              [attr.aria-expanded]="menuOpen" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-menu" *ngIf="menuOpen">
+    <a routerLink="/" (click)="menuOpen = false">Home</a>
+    <a routerLink="/providers" (click)="menuOpen = false">Find Services</a>
+    <ng-container *ngIf="authService.currentUser$ | async as user">
+      <ng-container *ngIf="user.role === 'Admin'; else mobileNonAdminNav">
+        <a routerLink="/admin" (click)="menuOpen = false">Category approvals</a>
+      </ng-container>
+      <ng-template #mobileNonAdminNav>
+        <ng-container *ngIf="user.role === 'Provider'; else mobileCustomerNav">
+          <a routerLink="/provider" (click)="menuOpen = false">Provider studio</a>
+        </ng-container>
+        <ng-template #mobileCustomerNav>
+          <a routerLink="/my-bookings" (click)="menuOpen = false">My Bookings</a>
+          <a routerLink="/dashboard" (click)="menuOpen = false">Dashboard</a>
+        </ng-template>
+      </ng-template>
+    </ng-container>
+
+    <div class="mobile-auth" *ngIf="authService.currentUser$ | async as user; else mobileLoggedOut">
+      <span class="user-name">{{ user.fullName }}</span>
+      <button class="btn btn-secondary" (click)="logout(); menuOpen = false">Logout</button>
+    </div>
+    <ng-template #mobileLoggedOut>
+      <div class="mobile-auth">
+        <a routerLink="/login" class="btn btn-secondary" (click)="menuOpen = false">Log in</a>
+        <a routerLink="/register" class="btn btn-primary" (click)="menuOpen = false">Get started</a>
+      </div>
+    </ng-template>
+  </div>
+</nav>

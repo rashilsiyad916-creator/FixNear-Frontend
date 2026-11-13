@@ -1,0 +1,215 @@
+﻿:host {
+  display: block;
+  position: relative;
+}
+
+.fancy {
+  --fancy-from: #2f7d53;
+  --fancy-to: #e8792b;
+  --fancy-tint: rgba(47, 125, 83, 0.1);
+  --fancy-soft: rgba(47, 125, 83, 0.14);
+  position: relative;
+  width: 100%;
+}
+
+.fancy.accent-violet {
+  --fancy-from: #2f7d53;
+  --fancy-to: #e8792b;
+  --fancy-tint: rgba(47, 125, 83, 0.1);
+  --fancy-soft: rgba(47, 125, 83, 0.14);
+}
+
+.fancy.accent-sky {
+  --fancy-from: #2f7d53;
+  --fancy-to: #2f7d53;
+  --fancy-tint: rgba(47, 125, 83, 0.1);
+  --fancy-soft: rgba(47, 125, 83, 0.14);
+}
+
+.fancy.accent-pink {
+  --fancy-from: #e8792b;
+  --fancy-to: #e8792b;
+  --fancy-tint: rgba(232, 121, 43, 0.1);
+  --fancy-soft: rgba(232, 121, 43, 0.14);
+}
+
+.fancy.accent-mint {
+  --fancy-from: #2f7d53;
+  --fancy-to: #2f7d53;
+  --fancy-tint: rgba(46, 125, 83, 0.1);
+  --fancy-soft: rgba(46, 125, 83, 0.14);
+}
+
+.fancy-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#fffdf8, #fffdf8) padding-box,
+    linear-gradient(120deg, var(--fancy-from), var(--fancy-to)) border-box;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy, #13261c);
+  cursor: pointer;
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.fancy-trigger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px -10px var(--fancy-soft);
+}
+
+.fancy.open .fancy-trigger {
+  box-shadow: 0 0 0 4px var(--fancy-soft), 0 8px 18px -10px var(--fancy-soft);
+  transform: none;
+}
+
+.fancy.bare .fancy-trigger {
+  border: none;
+  background: transparent;
+  padding: 4px 0;
+  border-radius: 8px;
+}
+
+.fancy.bare.open .fancy-trigger,
+.fancy.bare .fancy-trigger:hover {
+  box-shadow: none;
+}
+
+.fancy-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--fancy-soft);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.fancy-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.fancy-label.ph {
+  color: #a9a08f;
+  font-weight: 600;
+}
+
+.fancy-chevron {
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  color: var(--fancy-from);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+}
+
+.fancy.open .fancy-chevron {
+  transform: rotate(180deg);
+}
+
+.fancy-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+  background: #fffdf8;
+  border: 2px solid #f3eee2;
+  border-radius: 18px;
+  box-shadow:
+    0 24px 48px -16px rgba(19, 38, 28, 0.3),
+    0 6px 16px -6px rgba(19, 38, 28, 0.12);
+  z-index: 60;
+  animation: fancy-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: top left;
+}
+
+@keyframes fancy-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fancy-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy, #13261c);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.14s ease, transform 0.14s ease;
+}
+
+.fancy-opt:hover {
+  background: var(--fancy-tint);
+  transform: translateX(3px);
+}
+
+.fancy-opt-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--fancy-soft);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.fancy-opt-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fancy-check {
+  margin-left: auto;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.fancy-opt.sel {
+  background: linear-gradient(120deg, var(--fancy-from), var(--fancy-to));
+  color: #ffffff;
+  box-shadow: 0 8px 16px -8px var(--fancy-soft);
+}
+
+.fancy-opt.sel:hover {
+  transform: translateX(3px);
+}
+
+.fancy-opt.sel .fancy-opt-icon {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.fancy-empty {
+  padding: 14px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #a9a08f;
+}
+

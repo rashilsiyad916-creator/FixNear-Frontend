@@ -1,0 +1,83 @@
+<section class="admin-page">
+  <div class="admin-hero">
+    <div class="admin-hero-inner">
+      <span class="eyebrow">Admin workspace</span>
+      <h1>Category approvals</h1>
+      <p>Review categories requested by providers. Approving a request publishes it to every provider and customer.</p>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <div class="admin-toolbar">
+      <div class="admin-filters" role="tablist" aria-label="Category request status">
+        <button type="button" class="admin-filter"
+                *ngFor="let option of filters"
+                [class.active]="filter === option"
+                (click)="setFilter(option)">
+          {{ option }}
+        </button>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()" [disabled]="loading">
+        Refresh queue
+      </button>
+    </div>
+
+    <div class="admin-loading" *ngIf="loading">
+      <span class="spinner"></span> Loading requests…
+    </div>
+
+    <div class="admin-empty" *ngIf="!loading && !requests.length">
+      <span class="empty-icon">✓</span>
+      <h2>Nothing here</h2>
+      <p>
+        {{ filter === 'Pending'
+            ? 'No provider is waiting for a new category right now.'
+            : 'No requests with this status yet.' }}
+      </p>
+    </div>
+
+    <div class="admin-list" *ngIf="!loading && requests.length">
+      <article class="admin-request-row card" *ngFor="let request of requests"
+               [attr.data-request-id]="request.id">
+        <div class="request-main">
+          <div class="request-title">
+            <h2>{{ request.name }}</h2>
+            <span class="status-pill"
+                  [ngClass]="'status-' + request.status.toLowerCase()">
+              {{ request.status }}
+            </span>
+          </div>
+          <p class="request-provider">
+            Requested by <strong>{{ request.providerName }}</strong>
+            · {{ request.createdAt | date:'mediumDate' }}
+            <span *ngIf="request.reviewedAt">· Reviewed on {{ request.reviewedAt | date:'mediumDate' }}</span>
+          </p>
+          <p class="request-description" *ngIf="request.description">{{ request.description }}</p>
+          <p class="request-note" *ngIf="request.adminNote">Admin note: “{{ request.adminNote }}”</p>
+        </div>
+
+        <div class="request-actions" *ngIf="request.status === 'Pending'">
+          <label class="note-label" [for]="'adminNote-' + request.id">Review note</label>
+          <input class="admin-note" [id]="'adminNote-' + request.id"
+                 [name]="'adminNote-' + request.id"
+                 [(ngModel)]="notes[request.id]"
+                 maxlength="500"
+                 placeholder="Optional note shown to the provider">
+          <div class="action-buttons">
+            <button type="button" class="btn btn-secondary btn-sm reject-btn"
+                    [disabled]="busyId === request.id"
+                    (click)="reject(request)">
+              Reject
+            </button>
+            <button type="button" class="btn btn-primary btn-sm approve-btn"
+                    [disabled]="busyId === request.id"
+                    (click)="approve(request)">
+              <span class="spinner" *ngIf="busyId === request.id"></span>
+              Approve &amp; publish
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>

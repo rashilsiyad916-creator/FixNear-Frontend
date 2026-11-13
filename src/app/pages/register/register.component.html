@@ -1,0 +1,142 @@
+
+<div class="auth-split">
+  <div class="auth-aside">
+    <div class="page-watermark light" aria-hidden="true">FixNear</div>
+    <div class="aside-photo">
+      <img src="assets/services/mechanic-car-pro.jpg"
+           alt="Mechanic at work">
+    </div>
+    <div class="aside-content">
+      <a routerLink="/" class="brand">
+        <span class="brand-icon">F</span>
+        FixNear<span class="dot">.</span>
+      </a>
+
+      <span class="aside-badge">{{ isProvider ? 'For local professionals' : 'For homes & families' }}</span>
+
+      <h2>
+        {{ isProvider
+            ? 'Turn your craft into a thriving local business.'
+            : 'Good help is closer than you think.' }}
+      </h2>
+      <p>
+        {{ isProvider
+            ? 'Join a marketplace built for skilled pros. Set your own services, win nearby jobs and grow on the strength of your reviews.'
+            : 'Create one account for every job at home — from a flickering light to a full weekend refresh. Trusted people, honest prices.' }}
+      </p>
+
+      <div class="aside-features">
+        <ng-container *ngIf="isProvider; else customerPerks">
+          <div class="af"><span>✓</span> Free to join — no listing fees</div>
+          <div class="af"><span>✓</span> Bookings, services & availability in one studio</div>
+          <div class="af"><span>✓</span> Build a reputation customers trust</div>
+        </ng-container>
+        <ng-template #customerPerks>
+          <div class="af"><span>✓</span> Background-checked local professionals</div>
+          <div class="af"><span>✓</span> Upfront quotes with no surprises</div>
+          <div class="af"><span>✓</span> Secure bookings and honest reviews</div>
+        </ng-template>
+      </div>
+
+      <div class="stats-row">
+        <div class="mini-stat">
+          <strong>10K+</strong>
+          <span>Happy customers</span>
+        </div>
+        <div class="mini-stat">
+          <strong>500+</strong>
+          <span>Trusted pros</span>
+        </div>
+        <div class="mini-stat">
+          <strong>4.9★</strong>
+          <span>Average rating</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-main">
+    <form class="auth-form" (ngSubmit)="register()">
+      <a routerLink="/" class="mobile-brand">
+        <span class="brand-icon">F</span>
+        FixNear<span class="dot">.</span>
+      </a>
+
+      <div class="form-header">
+        <span class="form-eyebrow">{{ formEyebrow }}</span>
+        <h1>{{ formHeadline }}</h1>
+        <p>{{ formSubline }}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="fullName">Full name</label>
+        <input id="fullName" name="fullName" [(ngModel)]="fullName"
+               placeholder="Your full name" autocomplete="name" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input id="email" type="email" name="email" [(ngModel)]="email"
+               placeholder="you@example.com" autocomplete="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="pw-wrap">
+          <input id="password" [type]="showPassword ? 'text' : 'password'" name="password"
+                 [(ngModel)]="password" placeholder="At least 8 characters"
+                 minlength="8" autocomplete="new-password" required>
+          <button type="button" class="pw-toggle" (click)="showPassword = !showPassword"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                  tabindex="-1">
+            <svg *ngIf="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg *ngIf="showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <span class="field-hint" *ngIf="password && password.length < 8">
+          Minimum 8 characters
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label>Account type</label>
+        <app-fancy-select [options]="roleOptions" [model]="role"
+                          (modelChange)="role = $event"
+                          placeholder="Choose account type"
+                          accent="mint"></app-fancy-select>
+      </div>
+
+      <div class="role-note" *ngIf="isProvider">
+        <span class="note-spark" aria-hidden="true">✦</span>
+        <span>Next stop: Provider Studio, where you'll add your business details and first service.</span>
+      </div>
+
+      <div class="form-error" *ngIf="message">
+        <span>⚠</span> {{ message }}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg submit-btn"
+              [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span>
+        {{ submitLabel }}
+      </button>
+
+      <p class="form-footer">
+        Already part of FixNear?
+        <a routerLink="/login">Sign in</a>
+      </p>
+
+      <div class="form-trust">
+        <span>🔒</span> Free to join · No hidden fees · Your data stays private
+      </div>
+    </form>
+  </div>
+</div>

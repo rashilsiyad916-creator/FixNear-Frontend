@@ -1,0 +1,16 @@
+<section class="newsletter">
+  <div class="newsletter-inner">
+    <div class="nl-copy">
+      <div class="nl-icon" aria-hidden="true">✉️</div>
+      <div>
+        <h3>Stay in the loop</h3>
+        <p>Get tips, offers, and new provider alerts — no spam.</p>
+      </div>
+    </div>
+    <form class="nl-form" (ngSubmit)="subscribe()">
+      <input type="email" name="email" [(ngModel)]="email"
+             placeholder="you@example.com" aria-label="Email address" required>
+      <button type="submit" class="btn btn-primary">Subscribe</button>
+    </form>
+  </div>
+</section>

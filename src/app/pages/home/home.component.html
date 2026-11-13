@@ -1,0 +1,370 @@
+
+<section class="hero">
+  <div class="page-watermark" aria-hidden="true">FixNear</div>
+
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Rated 4.9/5 by 10,000+ Kerala households
+      </div>
+
+      <h1>
+        Your home,<br>
+        <em class="hero-script">handled by</em>
+        <span class="hero-highlight">trusted locals.</span>
+      </h1>
+
+      <p class="hero-text">
+        From a dripping tap to a full brand refresh, book background-checked
+        local pros who turn up on time and quote honestly. Compare real
+        reviews, see upfront prices, and cancel free — booking takes minutes.
+      </p>
+
+      <div class="hero-points">
+        <span><span class="hp-check">✓</span> Background-checked</span>
+        <span><span class="hp-check">✓</span> Upfront quotes</span>
+        <span><span class="hp-check">✓</span> Free cancellation</span>
+      </div>
+
+      <div class="hero-proof">
+        <div class="proof-avatars" aria-hidden="true">
+          <span class="proof-avatar a">S</span>
+          <span class="proof-avatar b">A</span>
+          <span class="proof-avatar c">N</span>
+          <span class="proof-avatar more">+</span>
+        </div>
+        <div class="proof-copy">
+          <div class="proof-stars" aria-hidden="true">★★★★★</div>
+          <strong>4.9/5 from 2,400+ verified reviews</strong>
+          <span>Trusted by 10,000+ homes across Kerala</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="visual-main">
+        <img src="https://images.pexels.com/photos/6050247/pexels-photo-6050247.jpeg?auto=compress&cs=tinysrgb&w=1000"
+             alt="Smiling handyman giving a thumbs up while holding a drill" loading="eager" decoding="async">
+        <div class="visual-sticker">
+          <span class="sticker-quote">“Relax — I’ve got this!”</span>
+          <small>Verified · On time · Fair price</small>
+        </div>
+        <div class="visual-badge live">
+          <span class="live-dot"></span> 128 pros online now
+        </div>
+      </div>
+
+      <div class="visual-card card-1">
+        <div class="card-emoji">⚡</div>
+        <div>
+          <strong>Your pro is on the way</strong>
+          <span>Arrives in ~20 min · Live updates</span>
+        </div>
+      </div>
+
+      <div class="visual-card card-3">
+        <div class="stars">★★★★★</div>
+        <div>
+          <strong>4.9/5 average rating</strong>
+          <span>From 2,400+ verified reviews</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-search-wrap">
+    <span class="search-kicker">Book a verified professional</span>
+
+    <app-search-bar [serviceOptions]="serviceOptions" (searchTriggered)="onSearch($event)"></app-search-bar>
+
+    <div class="search-popular" *ngIf="fixnearService.categories.length">
+      <span class="popular-label">Popular:</span>
+      <button type="button" class="popular-link"
+              *ngFor="let item of fixnearService.categories | slice:0:4"
+              (click)="category = item.name; search()">{{ item.name }}</button>
+    </div>
+  </div>
+</section>
+
+<section class="stats-bar" appReveal>
+  <div class="stats-inner">
+    <div class="stat stat-1">
+      <span class="stat-icon">👥</span>
+      <strong>10K+</strong>
+      <span>Homes served</span>
+    </div>
+    <div class="stat stat-2">
+      <span class="stat-icon">🛡️</span>
+      <strong>500+</strong>
+      <span>Verified pros</span>
+    </div>
+    <div class="stat stat-3">
+      <span class="stat-icon">⭐</span>
+      <strong>4.9/5</strong>
+      <span>Average rating</span>
+    </div>
+    <div class="stat stat-4">
+      <span class="stat-icon">🏷️</span>
+      <strong>Up to ₹800</strong>
+      <span>Fair & capped prices</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-inner">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Services</span>
+        <h2>What needs fixing today?</h2>
+        <p class="section-sub">Pick a category and see trusted pros near you</p>
+      </div>
+      <a routerLink="/providers" class="view-all-link">
+        View all →
+      </a>
+    </div>
+
+    <div class="category-grid">
+      <div class="skeleton-card" *ngIf="!fixnearService.categories.length">
+        <div class="skeleton sk-icon"></div>
+        <div class="skeleton sk-line"></div>
+        <div class="skeleton sk-line short"></div>
+      </div>
+      <div class="skeleton-card" *ngIf="!fixnearService.categories.length">
+        <div class="skeleton sk-icon"></div>
+        <div class="skeleton sk-line"></div>
+        <div class="skeleton sk-line short"></div>
+      </div>
+      <div class="skeleton-card" *ngIf="!fixnearService.categories.length">
+        <div class="skeleton sk-icon"></div>
+        <div class="skeleton sk-line"></div>
+        <div class="skeleton sk-line short"></div>
+      </div>
+      <div class="skeleton-card" *ngIf="!fixnearService.categories.length">
+        <div class="skeleton sk-icon"></div>
+        <div class="skeleton sk-line"></div>
+        <div class="skeleton sk-line short"></div>
+      </div>
+
+      <button class="category-card"
+              *ngFor="let item of fixnearService.categories; let i = index"
+              [ngClass]="'pastel-' + (i % 8)"
+              (click)="category = item.name; search()">
+        <span class="category-icon">{{ item.icon }}</span>
+        <div class="category-body">
+          <div class="category-title-row">
+            <h3>{{ item.name }}</h3>
+            <span class="count-badge">
+              {{ fixnearService.countProvidersByCategory(item.name) }}
+              {{ fixnearService.countProvidersByCategory(item.name) === 1 ? 'pro' : 'pros' }}
+            </span>
+          </div>
+          <p>{{ item.description }}</p>
+        </div>
+        <span class="arrow-btn" aria-hidden="true">→</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="section alt-bg" appReveal>
+  <div class="section-inner">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Featured</span>
+        <h2>Top-rated pros near you</h2>
+        <p class="section-sub">Handpicked, background-checked and ready to help</p>
+      </div>
+      <a routerLink="/providers" class="view-all-link">
+        See all →
+      </a>
+    </div>
+
+    <div class="provider-grid">
+      <article class="provider-card"
+               *ngFor="let provider of fixnearService.providers | slice:0:3">
+        <div class="card-image">
+          <img [src]="providerImage(provider)" [alt]="provider.name + ' - ' + provider.category" loading="lazy" (error)="onProviderImageError(provider, $event)">
+          <span class="availability" [class.off]="!provider.available">
+            {{ provider.available ? 'Available' : 'Busy' }}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <span class="card-category" [attr.data-category]="provider.category">{{ provider.category }}</span>
+          <h3>{{ provider.name }}</h3>
+          <p class="card-location">📍 {{ provider.area }} · {{ provider.experience }} yrs experience</p>
+
+          <div class="card-meta">
+            <div class="price-wrap">
+              <span class="price-from">From</span>
+              <strong>₹{{ provider.price }}</strong>
+            </div>
+            <span class="rating">★ {{ provider.rating }}</span>
+          </div>
+
+          <a [routerLink]="['/providers', provider.id]" class="btn btn-primary card-btn">
+            View profile →
+          </a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section gallery-section" appReveal>
+  <div class="section-inner">
+    <div class="section-heading center">
+      <div>
+        <span class="eyebrow">Our work</span>
+        <h2>Real pros, real results</h2>
+        <p class="section-sub">A glimpse of the professionals serving your neighbourhood</p>
+      </div>
+    </div>
+
+    <div class="gallery-grid">
+      <figure class="gallery-card tall">
+        <img src="assets/services/electrician-wiring-pro-v2.jpg"
+             alt="Professional electrician wiring a panel" loading="lazy">
+        <figcaption>
+          <strong>Electrical work</strong>
+          <span>Safe, certified installations</span>
+        </figcaption>
+      </figure>
+      <figure class="gallery-card">
+        <img src="assets/services/plumber-leak-pro.jpg"
+             alt="Professional plumber fixing pipes" loading="lazy">
+        <figcaption>
+          <strong>Plumbing</strong>
+          <span>Leaks fixed same day</span>
+        </figcaption>
+      </figure>
+      <figure class="gallery-card">
+        <img src="assets/services/carpenter-pro.jpg"
+             alt="Professional carpenter at work" loading="lazy">
+        <figcaption>
+          <strong>Carpentry</strong>
+          <span>Furniture &amp; fittings</span>
+        </figcaption>
+      </figure>
+      <figure class="gallery-card wide">
+        <img src="assets/services/mechanic-car-pro.jpg"
+             alt="Professional mechanic servicing a car" loading="lazy">
+        <figcaption>
+          <strong>Auto repair</strong>
+          <span>Engine &amp; service specialists</span>
+        </figcaption>
+      </figure>
+      <figure class="gallery-card">
+        <img src="assets/services/appliance-repair-pro-v2.jpg"
+             alt="Professional appliance repair technician" loading="lazy">
+        <figcaption>
+          <strong>Appliance repair</strong>
+          <span>All major brands</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works">
+  <div class="section-inner">
+    <div class="section-heading center">
+      <div>
+        <span class="eyebrow">How it works</span>
+        <h2>Booked in three easy steps</h2>
+      </div>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Tell us what's wrong</h3>
+        <p>Pick a service and share your area — we'll show pros nearby.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Pick your pro</h3>
+        <p>Compare ratings, prices and real reviews, then send a request.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Relax — it's handled</h3>
+        <p>Your verified pro arrives on time and gets the job done right.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="cta-photo">
+    <img src="assets/services/welding-pro-v2.jpg"
+         alt="Professional welder at work">
+  </div>
+  <div class="cta-inner">
+    <div class="cta-content">
+      <h2>Turn your skill into steady work</h2>
+      <p>Join Kerala's trusted home-services network and get booked by customers near you.</p>
+      <a routerLink="/register" class="btn btn-light btn-lg">Join FixNear →</a>
+    </div>
+    <div class="cta-features">
+      <div class="cta-feat"><span>✓</span> Free to join</div>
+      <div class="cta-feat"><span>✓</span> Set your own prices</div>
+      <div class="cta-feat"><span>✓</span> Grow your business</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-inner">
+    <div class="section-heading center">
+      <div>
+        <span class="eyebrow">Testimonials</span>
+        <h2>Loved by customers across Kerala</h2>
+        <p class="section-sub">Real stories from people who booked through FixNear</p>
+      </div>
+    </div>
+
+    <div class="testimonial-grid">
+      <article class="testimonial-card" *ngFor="let t of testimonials">
+        <div class="t-stars">{{ '★'.repeat(t.rating) }}{{ '☆'.repeat(5 - t.rating) }}</div>
+        <p class="t-quote">"{{ t.quote }}"</p>
+        <div class="t-author">
+          <div class="t-avatar">{{ t.name.charAt(0) }}</div>
+          <div>
+            <strong>{{ t.name }}</strong>
+            <span>{{ t.role }}</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section alt-bg">
+  <div class="section-inner faq-wrap">
+    <div class="faq-intro">
+      <span class="eyebrow">FAQ</span>
+      <h2>Common questions</h2>
+      <p class="section-sub">Everything you need to know before booking</p>
+      <a routerLink="/providers" class="btn btn-primary" style="margin-top: 20px;">Browse services →</a>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item" *ngFor="let f of faqs"
+           [class.open]="f.open"
+           (click)="f.open = !f.open">
+        <button class="faq-q" type="button">
+          <span>{{ f.q }}</span>
+          <span class="faq-chevron">{{ f.open ? '−' : '+' }}</span>
+        </button>
+        <div class="faq-a" *ngIf="f.open">
+          <p>{{ f.a }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

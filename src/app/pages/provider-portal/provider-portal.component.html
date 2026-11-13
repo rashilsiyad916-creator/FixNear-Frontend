@@ -1,0 +1,877 @@
+<section class="provider-page">
+  <div class="provider-hero">
+    <div class="page-watermark light" aria-hidden="true">FixNear</div>
+    <div class="hero-copy">
+      <span class="eyebrow">Provider studio</span>
+      <h1>
+        <ng-container *ngIf="profile; else onboardingTitle">
+          Welcome back, {{ firstName() }}
+        </ng-container>
+        <ng-template #onboardingTitle>Set up your storefront</ng-template>
+      </h1>
+      <p class="hero-sub">
+        <ng-container *ngIf="profile; else onboardingSub">
+          {{ profile.businessName }} · {{ profile.serviceArea }}
+        </ng-container>
+        <ng-template #onboardingSub>
+          Tell customers who you are and what you fix. Two minutes now, booked solid later.
+        </ng-template>
+      </p>
+      <div class="hero-badges" *ngIf="profile">
+        <span class="pill" [class.pill-ok]="profile.available" [class.pill-off]="!profile.available">
+          <span class="dot"></span>
+          {{ profile.available ? 'Accepting bookings' : 'Not accepting bookings' }}
+        </span>
+        <span class="pill" *ngIf="profile.verified">✓ Identity verified</span>
+        <span class="pill" *ngIf="!profile.verified">⏳ Verification pending</span>
+        <span class="pill rating-pill" *ngIf="profile.reviewCount">
+          ★ {{ profile.rating }} · {{ profile.reviewCount }} reviews
+        </span>
+      </div>
+    </div>
+
+    <div class="hero-actions" *ngIf="profile">
+      <button type="button" class="btn btn-secondary"
+              (click)="toggleAvailability()">
+        {{ profile.available ? 'Pause new bookings' : 'Resume bookings' }}
+      </button>
+      <a class="btn btn-primary" [routerLink]="['/providers', profile.id]">
+        View public profile
+      </a>
+    </div>
+  </div>
+
+  <div class="provider-shell">
+    <aside class="provider-nav">
+      <div class="nav-label">Workspace</div>
+      <button type="button" class="nav-item" [class.active]="tab === 'overview'"
+              (click)="setTab('overview')">
+        <span class="nav-icon">📊</span>
+        <span>Overview</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="tab === 'bookings'"
+              (click)="setTab('bookings')">
+        <span class="nav-icon">📅</span>
+        <span>Bookings</span>
+        <span class="nav-count" *ngIf="pendingCount">{{ pendingCount }}</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="tab === 'services'"
+              (click)="setTab('services')">
+        <span class="nav-icon">🛠️</span>
+        <span>My services</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="tab === 'categories'"
+              (click)="setTab('categories')">
+        <span class="nav-icon">🏷️</span>
+        <span>Categories</span>
+        <span class="nav-count" *ngIf="pendingCategoryRequests.length">{{ pendingCategoryRequests.length }}</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="tab === 'reviews'"
+              (click)="setTab('reviews')">
+        <span class="nav-icon">★</span>
+        <span>Reviews</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="tab === 'profile'"
+              (click)="setTab('profile')">
+        <span class="nav-icon">🏪</span>
+        <span>Business profile</span>
+      </button>
+
+      <div class="nav-tip" *ngIf="profile">
+        <strong>Tip</strong>
+        Keep your services and prices fresh — customers book the pros with the
+        clearest listings.
+      </div>
+    </aside>
+
+    <div class="provider-content">
+      <div class="loading-card" *ngIf="loading">
+        <span class="spinner dark"></span>
+        <p>Loading your workspace…</p>
+      </div>
+
+      <ng-container *ngIf="!loading">
+        <!-- ── Overview ─────────────────────────────────── -->
+        <section class="panel" *ngIf="tab === 'overview'">
+          <div class="onboard-banner" *ngIf="!profile">
+            <div>
+              <h2>Finish your provider profile</h2>
+              <p>Add your business details and your first service to appear in search results.</p>
+            </div>
+            <button type="button" class="btn btn-primary" (click)="setTab('profile')">
+              Complete setup
+            </button>
+          </div>
+
+          <ng-container *ngIf="profile">
+            <div class="stat-grid">
+              <div class="stat-card">
+                <span class="stat-icon blue">📅</span>
+                <strong>{{ stats?.totalBookings || 0 }}</strong>
+                <span>Total bookings</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-icon amber">⏳</span>
+                <strong>{{ stats?.pendingBookings || 0 }}</strong>
+                <span>Awaiting response</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-icon green">✓</span>
+                <strong>{{ stats?.todayBookings || 0 }}</strong>
+                <span>Scheduled today</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-icon violet">₹</span>
+                <strong>{{ money(stats?.totalEarnings || 0) }}</strong>
+                <span>Completed earnings</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-icon teal">₹</span>
+                <strong>{{ money(thisMonthEarnings) }}</strong>
+                <span>This month earnings</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-icon rose">★</span>
+                <strong>{{ stats?.averageRating || 0 }}</strong>
+                <span>{{ stats?.reviewCount || 0 }} reviews</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-icon teal">🛠️</span>
+                <strong>{{ stats?.activeServices || 0 }}</strong>
+                <span>Live services</span>
+              </div>
+            </div>
+
+            <div class="overview-grid">
+              <div class="card">
+                <div class="card-head">
+                  <div>
+                    <h2>Today's schedule</h2>
+                    <p>Jobs planned for today that need your attention</p>
+                  </div>
+                  <button type="button" class="link-btn" (click)="setTab('bookings')">
+                    View all
+                  </button>
+                </div>
+
+                <div class="empty-state" *ngIf="!todayBookings.length">
+                  <span>📅</span>
+                  <h3>No jobs scheduled today</h3>
+                  <p>New requests and accepted jobs for today will appear here.</p>
+                </div>
+
+                <div class="mini-booking" *ngFor="let booking of todayBookings">
+                  <div class="mini-main">
+                    <div class="mini-top">
+                      <strong>{{ formatService(booking.service) }}</strong>
+                      <span class="status" [class]="'status ' + booking.status.toLowerCase()">
+                        {{ booking.status }}
+                      </span>
+                    </div>
+                    <p>{{ booking.customerName }} · {{ prettyDate(booking.date) }}</p>
+                    <p class="mini-location">
+                      <a [href]="mapUrl(booking.address, booking.latitude, booking.longitude)"
+                         target="_blank" rel="noopener" title="Open location in Google Maps">
+                        📍 {{ booking.address || 'Location not provided' }}
+                      </a>
+                      <span class="exact-pin-badge" *ngIf="hasExactPin(booking)">Exact pin</span>
+                    </p>
+                  </div>
+                  <div class="mini-actions">
+                    <span class="mini-price">{{ money(booking.price) }}</span>
+                    <a *ngIf="telHref(booking.customerPhone) as phoneHref" [href]="phoneHref"
+                       class="link-btn" title="Call customer">Call</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head">
+                  <div>
+                    <h2>Recent bookings</h2>
+                    <p>Your latest customer requests</p>
+                  </div>
+                  <button type="button" class="link-btn" (click)="setTab('bookings')">
+                    View all
+                  </button>
+                </div>
+
+                <div class="empty-state" *ngIf="!recentBookings.length">
+                  <span>📭</span>
+                  <h3>No bookings yet</h3>
+                  <p>Publish your services and share your profile to get your first job.</p>
+                  <button type="button" class="btn btn-primary btn-sm"
+                          (click)="setTab('services')">Add a service</button>
+                </div>
+
+                <div class="mini-booking" *ngFor="let booking of recentBookings">
+                  <div class="mini-main">
+                    <div class="mini-top">
+                      <strong>{{ formatService(booking.service) }}</strong>
+                      <span class="status" [class]="'status ' + booking.status.toLowerCase()">
+                        {{ booking.status }}
+                      </span>
+                    </div>
+                    <p>{{ booking.customerName }} · {{ prettyDate(booking.date) }}</p>
+                  </div>
+                  <span class="mini-price">{{ money(booking.price) }}</span>
+                </div>
+              </div>
+
+              <div class="side-stack">
+                <div class="card completeness" [ngClass]="completenessTone">
+                  <div class="completeness-head">
+                    <div>
+                      <span class="tag">Storefront health</span>
+                      <h3>{{ completenessHeadline }}</h3>
+                    </div>
+                    <div class="completeness-ring" [style.--score]="completenessScore + '%'">
+                      <strong>{{ completenessScore }}%</strong>
+                    </div>
+                  </div>
+                  <div class="meter" aria-hidden="true">
+                    <span [style.width.%]="completenessScore"></span>
+                  </div>
+                  <p class="completeness-count">
+                    {{ completenessDone }} of {{ completenessTotal }} steps complete
+                  </p>
+                  <button type="button" class="completeness-next" *ngIf="completenessNext"
+                          (click)="openCompletenessStep(completenessNext)">
+                    <span class="next-icon">→</span>
+                    <span>
+                      <strong>{{ completenessNext.label }}</strong>
+                      <small>{{ completenessNext.hint }}</small>
+                    </span>
+                  </button>
+                  <p class="completeness-win" *ngIf="!completenessNext">
+                    🎉 Your storefront has everything customers look for.
+                  </p>
+                </div>
+
+                <div class="card profile-snap">
+                  <div class="snap-media">
+                    <img [src]="profile.image" [alt]="profile.businessName">
+                  </div>
+                  <div class="snap-body">
+                    <span class="tag">{{ profile.serviceArea }}</span>
+                    <h3>{{ profile.businessName }}</h3>
+                    <p>{{ profile.description || 'Add a short description so customers know what makes you different.' }}</p>
+                    <div class="snap-meta">
+                      <span>{{ profile.experience }} yrs exp</span>
+                      <span>{{ profile.activeServices }} services</span>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm"
+                            (click)="setTab('profile')">Edit profile</button>
+                  </div>
+                </div>
+
+                <div class="card quick-actions">
+                  <h3>Quick actions</h3>
+                  <button type="button" (click)="setTab('services'); openNewService()">
+                    <span>＋</span> Add a new service
+                  </button>
+                  <button type="button" (click)="setTab('categories')">
+                    <span>🏷️</span> Browse & propose categories
+                  </button>
+                  <button type="button" (click)="setTab('bookings')">
+                    <span>📅</span> Respond to bookings
+                  </button>
+                  <a [routerLink]="['/providers', profile.id]">
+                    <span>👁</span> Preview storefront
+                  </a>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </section>
+
+        <!-- ── Bookings ─────────────────────────────────── -->
+        <section class="panel" *ngIf="tab === 'bookings'">
+          <div class="panel-head">
+            <div>
+              <h2>Booking requests</h2>
+              <p>Accept jobs, mark work as done, or decline politely.</p>
+            </div>
+            <div class="head-tools">
+              <span class="count-chip">{{ filteredBookings.length }} shown</span>
+              <button type="button" class="btn btn-secondary btn-sm export-btn"
+                      (click)="exportBookingsCsv()">
+                ⬇ Export CSV
+              </button>
+            </div>
+          </div>
+
+          <div class="booking-toolbar">
+            <div class="search-field">
+              <span class="search-icon" aria-hidden="true">🔍</span>
+              <input type="search" name="bookingSearch"
+                     [(ngModel)]="bookingSearch"
+                     placeholder="Search by customer, service, address or booking #"
+                     aria-label="Search bookings">
+              <button type="button" class="search-clear" *ngIf="bookingSearchTerm"
+                      (click)="clearBookingSearch()" aria-label="Clear search">✕</button>
+            </div>
+            <span class="search-summary" *ngIf="bookingSearchTerm">
+              Matching “{{ bookingSearchTerm }}”
+            </span>
+          </div>
+
+          <div class="filter-row">
+            <button type="button" *ngFor="let filter of bookingFilters"
+                    class="filter-pill"
+                    [class.active]="bookingFilter === filter"
+                    (click)="bookingFilter = filter">
+              {{ filter }}
+              <span *ngIf="filter !== 'All'">{{ statusCount(filter) }}</span>
+            </button>
+          </div>
+
+          <div class="empty-state big" *ngIf="!filteredBookings.length">
+            <span>📭</span>
+            <h3>{{ bookingSearchTerm ? 'No matching bookings' : 'Nothing here yet' }}</h3>
+            <p *ngIf="bookingSearchTerm">
+              Try a different customer name, service or status — or clear the search.
+            </p>
+            <p *ngIf="!bookingSearchTerm">
+              When customers book your services, requests will appear in this list.
+            </p>
+            <button type="button" class="btn btn-secondary btn-sm" *ngIf="bookingSearchTerm"
+                    (click)="clearBookingSearch()">Clear search</button>
+          </div>
+
+          <div class="booking-list" *ngIf="filteredBookings.length">
+            <article class="booking-row" *ngFor="let booking of filteredBookings">
+              <div class="booking-main">
+                <div class="booking-title">
+                  <h3>{{ formatService(booking.service) }}</h3>
+                  <span class="status" [class]="'status ' + booking.status.toLowerCase()">
+                    {{ booking.status }}
+                  </span>
+                </div>
+                <div class="booking-meta">
+                  <span>👤 {{ booking.customerName }}</span>
+                  <span>📅 {{ prettyDate(booking.date) }}</span>
+                  <span class="booking-location-wrap">
+                    <a class="booking-location"
+                       [href]="mapUrl(booking.address, booking.latitude, booking.longitude)"
+                       target="_blank" rel="noopener"
+                       title="Open this location in Google Maps">📍 {{ booking.address }}</a>
+                    <span class="exact-pin-badge" *ngIf="hasExactPin(booking)">Exact pin</span>
+                  </span>
+                  <span class="price">{{ money(booking.price) }}</span>
+                </div>
+                <p class="booking-problem" *ngIf="booking.problem">
+                  “{{ booking.problem }}”
+                </p>
+                <div class="booking-contact">
+                  <a *ngIf="booking.customerEmail" [href]="'mailto:' + booking.customerEmail">{{ booking.customerEmail }}</a>
+                  <a *ngIf="telHref(booking.customerPhone) as phoneHref" [href]="phoneHref">{{ booking.customerPhone }}</a>
+                </div>
+              </div>
+
+              <div class="booking-actions">
+                <ng-container *ngIf="booking.status === 'Pending'">
+                  <button type="button" class="btn btn-primary btn-sm"
+                          (click)="setBookingStatus(booking, 'Accepted')">Accept job</button>
+                  <button type="button" class="btn btn-ghost btn-sm"
+                          (click)="setBookingStatus(booking, 'Cancelled')">Decline</button>
+                </ng-container>
+                <ng-container *ngIf="booking.status === 'Accepted'">
+                  <button type="button" class="btn btn-primary btn-sm"
+                          (click)="setBookingStatus(booking, 'Completed')">Mark completed</button>
+                  <button type="button" class="btn btn-ghost btn-sm"
+                          (click)="setBookingStatus(booking, 'Cancelled')">Cancel</button>
+                </ng-container>
+                <span class="booking-closed" *ngIf="booking.status === 'Completed'">Job closed</span>
+                <span class="booking-closed" *ngIf="booking.status === 'Cancelled'">Cancelled</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ── Services ─────────────────────────────────── -->
+        <section class="panel" *ngIf="tab === 'services'">
+          <div class="panel-head">
+            <div>
+              <h2>My services</h2>
+              <p>These are the jobs customers can book from your storefront.</p>
+            </div>
+            <button type="button" class="btn btn-primary" *ngIf="profile"
+                    (click)="openNewService()">＋ Add service</button>
+          </div>
+
+          <div class="onboard-banner" *ngIf="!profile">
+            <div>
+              <h2>Create your profile first</h2>
+              <p>You need a business profile before adding services.</p>
+            </div>
+            <button type="button" class="btn btn-primary" (click)="setTab('profile')">
+              Set up profile
+            </button>
+          </div>
+
+          <form class="service-form card" *ngIf="showServiceForm" (ngSubmit)="saveService()">
+            <div class="form-head">
+              <h3>{{ serviceForm.id ? 'Edit service' : 'New service' }}</h3>
+              <button type="button" class="icon-btn" (click)="cancelServiceForm()"
+                      aria-label="Close form">✕</button>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="serviceCategory">Category</label>
+                <select id="serviceCategory" name="serviceCategory"
+                        [(ngModel)]="serviceForm.categoryId">
+                  <option [ngValue]="null">Choose a category</option>
+                  <option *ngFor="let cat of categories" [ngValue]="cat.id">
+                    {{ cat.icon }} {{ cat.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="field full category-request-block" *ngIf="profile">
+                <div class="category-request-head">
+                  <div>
+                    <strong>Can’t find the right category?</strong>
+                    <p>Ask the FixNear admin team to add it. Approved categories appear in this list for every provider.</p>
+                  </div>
+                  <button type="button" class="btn btn-ghost btn-sm request-category-btn"
+                          id="requestCategoryBtn" (click)="openCategoryRequest()">
+                    + Request category
+                  </button>
+                </div>
+
+                <div class="category-request-form" *ngIf="showCategoryRequest">
+                  <div class="field">
+                    <label for="newCategoryName">Category name</label>
+                    <input id="newCategoryName" name="newCategoryName"
+                           [(ngModel)]="categoryRequestName" maxlength="100"
+                           placeholder="e.g. Pool Cleaning">
+                  </div>
+                  <div class="field">
+                    <label for="newCategoryDescription">What services fit here?</label>
+                    <textarea id="newCategoryDescription" name="newCategoryDescription"
+                              rows="2" maxlength="300"
+                              [(ngModel)]="categoryRequestDescription"
+                              placeholder="Tell the admin team what customers would book."></textarea>
+                  </div>
+                  <div class="category-request-actions">
+                    <button type="button" class="btn btn-ghost btn-sm"
+                            (click)="cancelCategoryRequest()">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm"
+                            id="submitCategoryRequest"
+                            [disabled]="savingCategoryRequest"
+                            (click)="submitCategoryRequest()">
+                      <span class="spinner" *ngIf="savingCategoryRequest"></span>
+                      {{ savingCategoryRequest ? 'Sending…' : 'Send for approval' }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="category-request-history" *ngIf="categoryRequests.length">
+                  <div class="category-request-history-head">
+                    <span class="pending-label">Your category requests</span>
+                    <button type="button" class="link-btn" (click)="refreshCategoryData()">
+                      Refresh status
+                    </button>
+                  </div>
+                  <div class="category-request-chip"
+                       *ngFor="let req of latestCategoryRequests"
+                       [ngClass]="'request-' + req.status.toLowerCase()">
+                    <span class="request-name">{{ req.name }}</span>
+                    <span class="request-status">{{ req.status }}</span>
+                    <span class="request-note" *ngIf="req.adminNote">“{{ req.adminNote }}”</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="serviceName">Service name</label>
+                <input id="serviceName" name="serviceName"
+                       [(ngModel)]="serviceForm.serviceName"
+                       placeholder="e.g. Fan & light installation">
+              </div>
+
+              <div class="field">
+                <label for="servicePrice">Base price (₹)</label>
+                <input id="servicePrice" name="servicePrice" type="number" min="0"
+                       [(ngModel)]="serviceForm.basePrice" placeholder="499">
+              </div>
+
+              <div class="field full service-photo-field">
+                <label>Service photo</label>
+                <div class="service-photo">
+                  <div class="service-photo-preview">
+                    <img [src]="serviceFormImage" [alt]="serviceForm.serviceName || 'Service photo'">
+                    <span class="spinner" *ngIf="uploadingServicePhoto"></span>
+                  </div>
+                  <div class="service-photo-copy">
+                    <p>Show customers the finished work — listings with a real photo get booked more often.</p>
+                    <div class="service-photo-actions">
+                      <label class="btn btn-secondary btn-sm upload-btn">
+                        <span class="spinner" *ngIf="uploadingServicePhoto"></span>
+                        {{ uploadingServicePhoto
+                            ? 'Uploading…'
+                            : (serviceFormHasCustomImage ? 'Replace photo' : 'Upload photo') }}
+                        <input type="file" accept=".jpg,.jpeg,.png,.webp"
+                               (change)="onServicePhotoSelected($event)"
+                               [disabled]="uploadingServicePhoto">
+                      </label>
+                      <button type="button" class="btn btn-ghost btn-sm"
+                              *ngIf="serviceFormHasCustomImage"
+                              (click)="removeServicePhoto()">Remove photo</button>
+                    </div>
+                    <span class="hint">JPG, PNG or WEBP · max 5 MB · we fall back to a category photo if you skip this</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field full">
+                <label for="serviceDescription">Description</label>
+                <textarea id="serviceDescription" name="serviceDescription" rows="3"
+                          [(ngModel)]="serviceForm.description"
+                          placeholder="What is included, how long it takes, parts policy…"></textarea>
+              </div>
+
+              <label class="switch-field">
+                <input type="checkbox" name="serviceActive"
+                       [(ngModel)]="serviceForm.isActive">
+                <span class="switch"></span>
+                <span>Visible to customers</span>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost" (click)="cancelServiceForm()">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="savingService">
+                <span class="spinner" *ngIf="savingService"></span>
+                {{ savingService ? 'Saving…' : (serviceForm.id ? 'Save changes' : 'Add service') }}
+              </button>
+            </div>
+          </form>
+
+          <div class="empty-state big" *ngIf="profile && !services.length && !showServiceForm">
+            <span>🛠️</span>
+            <h3>No services listed</h3>
+            <p>Add your first service so customers can book you.</p>
+            <button type="button" class="btn btn-primary btn-sm" (click)="openNewService()">
+              Add service
+            </button>
+          </div>
+
+          <div class="service-grid" *ngIf="services.length">
+            <article class="service-card" *ngFor="let service of services"
+                     [class.inactive]="!service.isActive">
+              <div class="service-thumb">
+                <img [src]="serviceImage(service)" [alt]="service.serviceName">
+              </div>
+              <div class="service-top">
+                <span class="service-cat">{{ service.categoryName }}</span>
+                <span class="status" [class]="'status ' + (service.isActive ? 'accepted' : 'cancelled')">
+                  {{ service.isActive ? 'Live' : 'Hidden' }}
+                </span>
+              </div>
+              <h3>{{ formatService(service.serviceName) }}</h3>
+              <p>{{ service.description || 'No description added yet.' }}</p>
+              <div class="service-bottom">
+                <strong>{{ money(service.basePrice) }}</strong>
+                <span>{{ service.bookingCount }} bookings</span>
+              </div>
+              <div class="service-actions">
+                <button type="button" class="btn btn-ghost btn-sm"
+                        (click)="editService(service)">Edit</button>
+                <button type="button" class="btn btn-ghost btn-sm"
+                        (click)="toggleServiceActive(service)">
+                  {{ service.isActive ? 'Hide' : 'Show' }}
+                </button>
+                <button type="button" class="btn btn-danger btn-sm"
+                        (click)="deleteService(service)">Delete</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ── Categories & Proposals ────────────────────── -->
+        <section class="panel" *ngIf="tab === 'categories'">
+          <div class="panel-head">
+            <div>
+              <h2>Service Categories & Specializations</h2>
+              <p>Explore all active platform categories or propose a new trade for admin approval.</p>
+            </div>
+            <div class="panel-actions">
+              <button type="button" class="btn btn-primary" (click)="openCategoryRequest()">
+                + Propose new category
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Proposal Form Modal / In-Page Card -->
+          <div class="category-proposal-box card" *ngIf="showCategoryRequest">
+            <div class="proposal-box-head">
+              <div>
+                <h3>Propose a New Service Category</h3>
+                <p>Tell the admin team about your trade so it can be added to the platform.</p>
+              </div>
+              <button type="button" class="btn-close" (click)="cancelCategoryRequest()" aria-label="Close">✕</button>
+            </div>
+            <div class="proposal-box-body">
+              <div class="field">
+                <label for="newPortalCatName">Category Name <span class="required">*</span></label>
+                <input id="newPortalCatName" type="text" [(ngModel)]="categoryRequestName"
+                       placeholder="e.g. Chimney & Kitchen Hood Cleaning" maxlength="100">
+              </div>
+              <div class="field">
+                <label for="newPortalCatDesc">Scope of Services & Description <span class="required">*</span></label>
+                <textarea id="newPortalCatDesc" rows="3" [(ngModel)]="categoryRequestDescription"
+                          placeholder="Describe the typical services customers would book in this category..."></textarea>
+              </div>
+              <div class="proposal-box-footer">
+                <button type="button" class="btn btn-ghost" (click)="cancelCategoryRequest()">Cancel</button>
+                <button type="button" class="btn btn-primary" [disabled]="savingCategoryRequest" (click)="submitCategoryRequest()">
+                  <span class="spinner" *ngIf="savingCategoryRequest"></span>
+                  {{ savingCategoryRequest ? 'Submitting…' : 'Submit for Admin Approval' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- My Proposals Tracker -->
+          <div class="proposals-tracker-card card">
+            <div class="tracker-head">
+              <div>
+                <h3>My Proposed Categories</h3>
+                <p>Track the approval status of specializations you have requested.</p>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" (click)="refreshCategoryData()">
+                ↻ Refresh status
+              </button>
+            </div>
+
+            <div class="proposals-list" *ngIf="categoryRequests.length; else noProposals">
+              <div class="proposal-item" *ngFor="let req of categoryRequests" [ngClass]="'status-' + req.status.toLowerCase()">
+                <div class="proposal-main">
+                  <div class="proposal-title-row">
+                    <span class="proposal-name">{{ req.name }}</span>
+                    <span class="proposal-status-badge" [ngClass]="'badge-' + req.status.toLowerCase()">
+                      <span *ngIf="req.status === 'Pending'">⏳ Pending Review</span>
+                      <span *ngIf="req.status === 'Approved'">✓ Approved</span>
+                      <span *ngIf="req.status === 'Rejected'">✕ Rejected</span>
+                    </span>
+                  </div>
+                  <p class="proposal-desc" *ngIf="req.description">{{ req.description }}</p>
+                  <div class="proposal-meta">
+                    <span class="proposal-date">Requested on {{ req.createdAt | date:'mediumDate' }}</span>
+                    <span class="admin-feedback" *ngIf="req.adminNote">Admin Note: “{{ req.adminNote }}”</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ng-template #noProposals>
+              <div class="empty-state compact">
+                <p>You haven’t proposed any new categories yet.</p>
+                <button type="button" class="link-btn" (click)="openCategoryRequest()">+ Propose your first category</button>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Platform Categories Directory -->
+          <div class="categories-directory-card card">
+            <div class="directory-head">
+              <div>
+                <h3>Platform Categories Directory</h3>
+                <p>Currently active categories available for services on FixNear.</p>
+              </div>
+              <div class="category-search-wrap">
+                <input type="text" class="category-search-input" [(ngModel)]="categorySearch"
+                       placeholder="🔍 Search categories...">
+              </div>
+            </div>
+
+            <div class="category-cards-grid">
+              <div class="cat-portal-card" *ngFor="let cat of filteredCategories">
+                <div class="cat-icon">{{ cat.icon || '🏷️' }}</div>
+                <div class="cat-info">
+                  <h4>{{ cat.name }}</h4>
+                  <p>{{ cat.description || 'Verified local service category.' }}</p>
+                </div>
+                <button type="button" class="btn btn-ghost btn-xs offer-btn" (click)="offerServiceInCategory(cat)">
+                  + Offer Service
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Reviews ──────────────────────────────────── -->
+        <section class="panel" *ngIf="tab === 'reviews'">
+          <div class="panel-head">
+            <div>
+              <h2>Customer reviews</h2>
+              <p>What customers say after booking your services.</p>
+            </div>
+          </div>
+
+          <div class="rating-summary card" *ngIf="profile">
+            <div class="big-rating">
+              <strong>{{ profile.rating || '—' }}</strong>
+              <span class="stars">{{ stars(profile.rating) }}</span>
+              <span>{{ profile.reviewCount }} reviews</span>
+            </div>
+            <p>Great service keeps your rating high. Reply fast and finish jobs on time.</p>
+          </div>
+
+          <div class="empty-state big" *ngIf="!reviews.length">
+            <span>⭐</span>
+            <h3>No reviews yet</h3>
+            <p>Complete your first bookings to collect reviews.</p>
+          </div>
+
+          <div class="review-list" *ngIf="reviews.length">
+            <article class="review-row" *ngFor="let review of reviews">
+              <div class="review-avatar">{{ review.author.charAt(0) }}</div>
+              <div class="review-body">
+                <div class="review-head">
+                  <strong>{{ review.author }}</strong>
+                  <span class="stars small">{{ stars(review.rating) }}</span>
+                  <span class="review-date">{{ prettyDate(review.date) }}</span>
+                </div>
+                <p>{{ review.comment }}</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ── Profile ──────────────────────────────────── -->
+        <section class="panel" *ngIf="tab === 'profile'">
+          <div class="panel-head">
+            <div>
+              <h2>{{ isOnboarding ? 'Set up your business' : 'Business profile' }}</h2>
+              <p>
+                {{ isOnboarding
+                    ? 'This information appears on your public FixNear storefront.'
+                    : 'Keep your details accurate so customers can find and trust you.' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="profile-layout">
+            <div class="card photo-card">
+              <div class="photo-preview">
+                <img [src]="profile?.image || 'assets/services/electrician-wiring-pro-v2.jpg'"
+                     [alt]="profile?.businessName || 'Provider photo'">
+              </div>
+              <h3>Storefront photo</h3>
+              <p>A friendly photo of you or your work builds trust.</p>
+              <label class="btn btn-secondary btn-sm upload-btn">
+                <span class="spinner" *ngIf="uploadingPhoto"></span>
+                {{ uploadingPhoto ? 'Uploading…' : 'Change photo' }}
+                <input type="file" accept=".jpg,.jpeg,.png,.webp"
+                       (change)="onPhotoSelected($event)" [disabled]="uploadingPhoto">
+              </label>
+              <span class="hint">JPG, PNG or WEBP · max 5 MB</span>
+            </div>
+
+            <form class="card profile-form" (ngSubmit)="saveProfile()">
+              <div class="form-grid">
+                <div class="field full">
+                  <label for="providerBusinessName">Business name</label>
+                  <input id="providerBusinessName" name="businessName"
+                         [(ngModel)]="profileForm.businessName"
+                         placeholder="e.g. Rahul Electricals">
+                </div>
+
+                <div class="field">
+                  <label for="providerServiceArea">Service area</label>
+                  <input id="providerServiceArea" name="serviceArea"
+                         [(ngModel)]="profileForm.serviceArea"
+                         placeholder="e.g. Tirur, Malappuram">
+                </div>
+
+                <div class="field">
+                  <label for="providerExperience">Years of experience</label>
+                  <input id="providerExperience" name="experience" type="number"
+                         min="0" max="60" [(ngModel)]="profileForm.experience">
+                </div>
+
+                <div class="field full">
+                  <label for="providerAddress">Business address</label>
+                  <input id="providerAddress" name="address"
+                         [(ngModel)]="profileForm.address"
+                         placeholder="Street, landmark, city">
+                </div>
+
+                <div class="field full">
+                  <label for="providerPhone">Phone number</label>
+                  <input id="providerPhone" name="phone"
+                         [(ngModel)]="profileForm.phone"
+                         placeholder="+91 98765 43210">
+                </div>
+
+                <div class="field full">
+                  <label for="providerDescription">About your business</label>
+                  <textarea id="providerDescription" name="description" rows="4"
+                            [maxlength]="maxDescription"
+                            [(ngModel)]="profileForm.description"
+                            placeholder="Tell customers what you fix, your guarantees, and why they should pick you."></textarea>
+                  <span class="hint">{{ profileForm.description.length }}/{{ maxDescription }}</span>
+                </div>
+              </div>
+
+              <ng-container *ngIf="isOnboarding">
+                <div class="onboard-divider">
+                  <span>Your first service</span>
+                </div>
+
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="onboardCategory">Category</label>
+                    <select id="onboardCategory" name="categoryId"
+                            [(ngModel)]="profileForm.categoryId">
+                      <option [ngValue]="null">Choose a category</option>
+                      <option *ngFor="let cat of categories" [ngValue]="cat.id">
+                        {{ cat.icon }} {{ cat.name }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="field">
+                    <label for="onboardServiceName">Service name</label>
+                    <input id="onboardServiceName" name="serviceName"
+                           [(ngModel)]="profileForm.serviceName"
+                           placeholder="e.g. Home wiring repair">
+                  </div>
+
+                  <div class="field">
+                    <label for="onboardBasePrice">Base price (₹)</label>
+                    <input id="onboardBasePrice" name="basePrice" type="number" min="0"
+                           [(ngModel)]="profileForm.basePrice" placeholder="499">
+                  </div>
+
+                  <div class="field full">
+                    <label for="onboardServiceDescription">Service description</label>
+                    <textarea id="onboardServiceDescription" name="serviceDescription"
+                              rows="2" [(ngModel)]="profileForm.serviceDescription"
+                              placeholder="What's included in this service?"></textarea>
+                  </div>
+                </div>
+              </ng-container>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-ghost" (click)="setTab('overview')">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="savingProfile">
+                  <span class="spinner" *ngIf="savingProfile"></span>
+                  {{ savingProfile ? 'Saving…' : (isOnboarding ? 'Publish storefront' : 'Save changes') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </ng-container>
+    </div>
+  </div>
+</section>

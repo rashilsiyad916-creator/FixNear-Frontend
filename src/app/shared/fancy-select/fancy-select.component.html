@@ -1,0 +1,28 @@
+<div class="fancy" [class]="'fancy accent-' + accent" [class.open]="open" [class.bare]="bare">
+  <button type="button" class="fancy-trigger" (click)="toggle()"
+          [attr.aria-expanded]="open" aria-haspopup="listbox">
+    <span class="fancy-icon" *ngIf="selected as sel">{{ sel.icon }}</span>
+    <span class="fancy-label" [class.ph]="!selected">
+      {{ selected ? selected.label : placeholder }}
+    </span>
+    <span class="fancy-chevron" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="3" stroke-linecap="round"
+           stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </span>
+  </button>
+
+  <div class="fancy-menu" role="listbox" *ngIf="open">
+    <button type="button" role="option" class="fancy-opt" *ngFor="let o of options"
+            [class.sel]="o.value === model"
+            [attr.aria-selected]="o.value === model"
+            (click)="select(o)">
+      <span class="fancy-opt-icon" *ngIf="o.icon">{{ o.icon }}</span>
+      <span class="fancy-opt-label">{{ o.label }}</span>
+      <span class="fancy-check" *ngIf="o.value === model">✓</span>
+    </button>
+    <div class="fancy-empty" *ngIf="!options.length">Nothing here yet</div>
+  </div>
+</div>

@@ -1,0 +1,144 @@
+
+<section class="page">
+  <div class="page-head">
+    <div class="page-watermark" aria-hidden="true">FixNear</div>
+    <div class="page-header">
+      <div>
+        <span class="eyebrow">Your activity</span>
+        <h1>My Bookings</h1>
+        <p class="page-sub">View and manage your service requests in one place.</p>
+      </div>
+      <a routerLink="/providers" class="btn btn-primary">+ New booking</a>
+    </div>
+  </div>
+
+  <ng-container *ngIf="bookings$ | async as bookings">
+    <div *ngIf="bookings.length; else empty">
+      <div class="status-tabs" role="tablist" aria-label="Filter bookings by status">
+        <button type="button" role="tab"
+                *ngFor="let tab of statusTabs"
+                class="status-tab"
+                [class.active]="statusFilter === tab"
+                [attr.aria-selected]="statusFilter === tab"
+                (click)="setStatusFilter(tab)">
+          <span>{{ tab }}</span>
+          <span class="tab-count">{{ countByStatus(bookings, tab) }}</span>
+        </button>
+      </div>
+
+      <div *ngIf="filterBookings(bookings).length; else noMatch" class="booking-list">
+        <article class="booking-card" *ngFor="let booking of filterBookings(bookings)">
+          <div class="booking-icon">{{ getServiceIcon(booking.service) }}</div>
+
+          <div class="booking-info">
+            <div class="booking-top">
+              <span class="booking-service">{{ formatService(booking.service) }}</span>
+              <span class="status"
+                    [class.pending]="booking.status === 'Pending'"
+                    [class.accepted]="booking.status === 'Accepted'"
+                    [class.cancelled]="booking.status === 'Cancelled'"
+                    [class.completed]="booking.status === 'Completed'">
+                {{ booking.status }}
+              </span>
+            </div>
+            <h3>{{ booking.providerName }}</h3>
+            <div class="booking-meta">
+              <span>📅 {{ booking.date }}</span>
+              <span class="booking-location-wrap">
+                <a class="booking-location"
+                   [href]="mapUrl(booking.address, booking.latitude, booking.longitude)"
+                   target="_blank" rel="noopener"
+                   title="Open this location in Google Maps">📍 {{ booking.address }}</a>
+                <span class="exact-pin-badge" *ngIf="hasExactPin(booking)">Exact pin</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="booking-actions"
+               *ngIf="booking.status === 'Pending' || booking.status === 'Completed'">
+            <button
+              *ngIf="booking.status === 'Pending'"
+              type="button"
+              class="btn btn-danger btn-sm"
+              (click)="cancelBooking(booking.id)">
+              Cancel
+            </button>
+
+            <span class="reviewed-badge"
+                  *ngIf="booking.status === 'Completed' && hasReview(booking)">
+              ✓ Reviewed
+            </span>
+
+            <button
+              *ngIf="canReview(booking) && reviewingId !== booking.id"
+              type="button"
+              class="btn btn-secondary btn-sm review-btn"
+              (click)="startReview(booking)">
+              Leave a review
+            </button>
+          </div>
+
+          <div class="review-panel" *ngIf="reviewingId === booking.id">
+            <div class="review-panel-head">
+              <div>
+                <strong>How was your service?</strong>
+                <span>Rate {{ booking.providerName }} for “{{ formatService(booking.service) }}”</span>
+              </div>
+              <button type="button" class="review-close"
+                      (click)="cancelReview()" aria-label="Close review form">✕</button>
+            </div>
+
+            <div class="star-picker" role="radiogroup" aria-label="Star rating">
+              <button type="button" class="star-btn"
+                      *ngFor="let star of stars"
+                      [class.active]="star <= reviewRating"
+                      [attr.aria-checked]="star === reviewRating"
+                      [attr.aria-label]="star + (star === 1 ? ' star' : ' stars')"
+                      role="radio"
+                      (click)="setRating(star)">★</button>
+              <span class="star-label">{{ ratingLabel }}</span>
+            </div>
+
+            <textarea class="review-textarea" name="reviewComment"
+                      [(ngModel)]="reviewComment"
+                      maxlength="500" rows="3"
+                      placeholder="What did they do well? (optional)"></textarea>
+
+            <div class="review-actions">
+              <span class="review-hint">Your review helps other customers choose with confidence.</span>
+              <button type="button" class="btn btn-secondary btn-sm"
+                      (click)="cancelReview()">Cancel</button>
+              <button type="button" class="btn btn-primary btn-sm review-submit"
+                      [disabled]="reviewSubmitting || !reviewRating"
+                      (click)="submitReview(booking)">
+                {{ reviewSubmitting ? 'Posting…' : 'Post review' }}
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #noMatch>
+        <div class="empty-state compact">
+          <div class="empty-icon">🔍</div>
+          <h2>No {{ statusFilter }} bookings</h2>
+          <p>Try another status tab to see the rest of your requests.</p>
+          <button class="btn btn-secondary" (click)="setStatusFilter('All')">
+            View all bookings
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  </ng-container>
+
+  <ng-template #empty>
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h2>No bookings yet</h2>
+      <p>Your service requests will appear here once you book a professional.</p>
+      <a routerLink="/providers" class="btn btn-primary">
+        Find a provider →
+      </a>
+    </div>
+  </ng-template>
+</section>

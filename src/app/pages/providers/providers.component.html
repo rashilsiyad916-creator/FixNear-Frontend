@@ -1,0 +1,157 @@
+<section class="page">
+  <div class="page-hero">
+    <div class="page-watermark" aria-hidden="true">FixNear</div>
+    <div class="page-header">
+      <div class="header-text">
+        <div class="header-badge">
+          <span class="badge-sparkle">✨</span>
+          <span>Verified local pros · Transparent pricing up to ₹800</span>
+        </div>
+        <h1>Find service providers</h1>
+        <p class="page-sub">Compare verified local professionals across Kerala and book in seconds.</p>
+        <div class="hero-points">
+          <span><span class="hp-check">✓</span> Background verified</span>
+          <span><span class="hp-check">✓</span> No hidden fees</span>
+          <span><span class="hp-check">✓</span> Free cancellation</span>
+        </div>
+      </div>
+      <div class="header-photo">
+        <img src="assets/services/electrician-wiring-pro-v2.jpg" alt="Electrician at work">
+        <span class="photo-sticker">500+ verified pros</span>
+      </div>
+    </div>
+
+    <div class="quick-category-pills">
+      <button class="pill-btn" *ngFor="let cat of quickCategories"
+              [class.active]="category === cat.name"
+              (click)="toggleCategory(cat.name)" type="button">
+        <span class="pill-icon">{{ cat.icon }}</span>
+        <span>{{ cat.name }}</span>
+      </button>
+    </div>
+
+    <div class="filters">
+      <app-search-bar [serviceOptions]="categoryOptions"
+                      (searchTriggered)="onSearchBar($event)"
+                      [compact]="true"
+                      placeholder="Search by area"></app-search-bar>
+      <div class="filter-extras">
+        <div class="filter-group">
+          <label>Sort by</label>
+          <app-fancy-select [options]="sortOptions" [model]="sort"
+                            (modelChange)="onSortChange($event)"
+                            placeholder="Recommended" accent="sky"></app-fancy-select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-bar">
+    <p class="result-count">
+      <strong>{{ providers.length }}</strong>
+      {{ providers.length === 1 ? 'provider' : 'providers' }} found
+    </p>
+    <div class="results-tools">
+      <label class="toggle" [class.on]="availableOnly">
+        <input type="checkbox" [(ngModel)]="availableOnly" (change)="search()">
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        Available only
+      </label>
+      <button class="fav-filter" [class.on]="favoritesOnly"
+              (click)="favoritesOnly = !favoritesOnly; search()">
+        ♥ Favorites
+        <span class="fav-count">{{ favCount }}</span>
+      </button>
+      <div class="active-filters" *ngIf="hasActiveFilters">
+        <span class="filter-chip" *ngIf="category">{{ category }}</span>
+        <span class="filter-chip" *ngIf="area">📍 {{ area }}</span>
+        <span class="filter-chip" *ngIf="availableOnly">● Available</span>
+        <span class="filter-chip" *ngIf="favoritesOnly">♥ Saved</span>
+        <span class="filter-chip" *ngIf="sort">Sorted</span>
+        <button class="clear-btn" (click)="clearFilters()">
+          Clear all
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="provider-grid" *ngIf="providers.length; else noResults">
+    <article class="provider-card" *ngFor="let p of providers">
+      <div class="card-image">
+        <img [src]="providerImage(p)" [alt]="p.name + ' - ' + p.category" loading="lazy" (error)="onProviderImageError(p, $event)">
+        <span class="availability" [class.off]="!p.available">
+          <span class="avail-dot" *ngIf="p.available"></span>
+          {{ p.available ? 'Available today' : 'Book in advance' }}
+        </span>
+        <button class="fav-btn" type="button"
+                [class.active]="isFavorite(p.id)"
+                (click)="toggleFavorite(p, $event)"
+                [attr.aria-label]="isFavorite(p.id) ? 'Remove from favorites' : 'Save to favorites'">
+          {{ isFavorite(p.id) ? '♥' : '♡' }}
+        </button>
+      </div>
+
+      <div class="card-body">
+        <div class="card-top">
+          <div class="card-categories">
+            <span class="card-category" [attr.data-category]="p.category">{{ p.category }}</span>
+            <span class="card-category card-category-extra"
+                  *ngFor="let cat of extraCategories(p)">{{ cat }}</span>
+            <span class="verified-tag" *ngIf="p.verified">✓ Verified</span>
+          </div>
+          <span class="rating">★ {{ p.rating }}</span>
+        </div>
+
+        <div class="card-title-row">
+          <h3>{{ p.name }}</h3>
+          <span class="response-pill">⚡ ~15m</span>
+        </div>
+
+        <div class="card-details">
+          <span>📍 {{ p.area }}</span>
+          <span>💼 {{ p.experience }} yrs exp</span>
+          <span *ngIf="p.services?.length">🛠️ {{ p.services?.length }} services</span>
+        </div>
+
+        <p class="card-services" *ngIf="cardServices(p).length">
+          <span class="card-services-label">{{ category ? 'Matching services' : 'Services' }}</span>
+          <span class="service-tag" *ngFor="let service of cardServices(p)">{{ service }}</span>
+          <span class="service-tag more" *ngIf="hiddenServiceCount(p)">
+            +{{ hiddenServiceCount(p) }}
+          </span>
+        </p>
+
+        <p class="card-desc">{{ p.description }}</p>
+
+        <div class="card-footer">
+          <div class="price">
+            <span class="price-prefix">From</span>
+            <strong>₹{{ p.price }}</strong>
+            <span class="zero-fee">· Zero fee</span>
+          </div>
+          <a [routerLink]="['/providers', p.id]"
+             [queryParams]="{ area: area || null }"
+             class="btn btn-primary btn-sm book-cta">
+            Book now →
+          </a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <ng-template #noResults>
+    <div class="empty-state">
+      <div class="empty-icon">{{ favoritesOnly ? '💔' : '🔍' }}</div>
+      <h2>{{ favoritesOnly && !hasOtherFilters ? 'No saved providers yet' : 'No providers found' }}</h2>
+      <p *ngIf="favoritesOnly && !hasOtherFilters">
+        Tap the ♡ on any provider card to save them here for quick access.
+      </p>
+      <p *ngIf="!(favoritesOnly && !hasOtherFilters)">
+        Try a different category or area, or clear your filters.
+      </p>
+      <button class="btn btn-primary" (click)="clearFilters()">
+        {{ favoritesOnly && !hasOtherFilters ? 'Browse all providers' : 'Clear filters' }}
+      </button>
+    </div>
+  </ng-template>
+</section>

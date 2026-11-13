@@ -1,0 +1,106 @@
+
+<section class="dashboard-page">
+  <div class="welcome-banner">
+    <div class="page-watermark light" aria-hidden="true">FixNear</div>
+    <div class="welcome-main">
+      <div class="welcome-avatar" *ngIf="authService.currentUser$ | async as user">
+        {{ user.fullName.charAt(0) }}
+      </div>
+      <div>
+        <span class="eyebrow">Dashboard</span>
+        <h1>Welcome back<span *ngIf="authService.currentUser$ | async as user">, {{ user.fullName.split(' ')[0] }}</span></h1>
+        <p class="page-sub">Here's what's happening with your account today.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/my-bookings" class="btn btn-secondary">My Bookings</a>
+      <a routerLink="/providers" class="btn btn-primary">Find Services</a>
+    </div>
+  </div>
+
+  <div class="quick-stats">
+    <div class="q-stat">
+      <div class="q-icon blue">📅</div>
+      <div>
+        <strong>{{ (bookings$ | async)?.length || 0 }}</strong>
+        <span>Total bookings</span>
+      </div>
+    </div>
+    <div class="q-stat">
+      <div class="q-icon green">✓</div>
+      <div>
+        <strong>{{ getPendingCount() }}</strong>
+        <span>Pending requests</span>
+      </div>
+    </div>
+    <div class="q-stat">
+      <div class="q-icon purple">🔍</div>
+      <div>
+        <strong>{{ fixnearService.providers.length }}</strong>
+        <span>Providers nearby</span>
+      </div>
+    </div>
+    <div class="q-stat">
+      <div class="q-icon amber">⭐</div>
+      <div>
+        <strong>4.9</strong>
+        <span>Avg provider rating</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">
+    <h2>Quick actions</h2>
+    <span>Everything you need, one tap away</span>
+  </div>
+
+  <div class="dashboard-grid">
+    <a routerLink="/my-bookings" class="dash-card">
+      <div class="dash-icon blue">📅</div>
+      <div class="dash-body">
+        <h3>My Bookings</h3>
+        <p>View and manage your service requests, track status, and cancel appointments.</p>
+      </div>
+      <span class="dash-arrow">→</span>
+    </a>
+
+    <a routerLink="/providers" class="dash-card">
+      <div class="dash-icon green">🔍</div>
+      <div class="dash-body">
+        <h3>Find Services</h3>
+        <p>Browse local professionals by category, compare prices, and read reviews.</p>
+      </div>
+      <span class="dash-arrow">→</span>
+    </a>
+
+    <a routerLink="/register" class="dash-card" *ngIf="isCustomer()">
+      <div class="dash-icon purple">🧰</div>
+      <div class="dash-body">
+        <h3>Become a provider</h3>
+        <p>Offer your professional services and start earning on your own schedule.</p>
+      </div>
+      <span class="dash-arrow">→</span>
+    </a>
+
+    <a routerLink="/providers" class="dash-card">
+      <div class="dash-icon amber">⭐</div>
+      <div class="dash-body">
+        <h3>Top rated</h3>
+        <p>Discover the highest-rated professionals in your area.</p>
+      </div>
+      <span class="dash-arrow">→</span>
+    </a>
+  </div>
+
+  <div class="cta-banner">
+    <div class="cta-banner-photo">
+      <img src="assets/services/mechanic-car-pro.jpg"
+           alt="Mechanic at work">
+    </div>
+    <div class="cta-banner-content">
+      <h3>Need help with something?</h3>
+      <p>Browse our categories and find the right professional for your job.</p>
+    </div>
+    <a routerLink="/providers" class="btn btn-primary">Browse services →</a>
+  </div>
+</section>

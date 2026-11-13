@@ -1,0 +1,137 @@
+
+<div class="auth-split">
+  <div class="auth-aside">
+    <div class="page-watermark light" aria-hidden="true">FixNear</div>
+    <div class="aside-photo">
+      <img src="assets/services/electrician-wiring-pro-v2.jpg"
+           alt="Professional tools">
+    </div>
+    <div class="aside-content">
+      <a routerLink="/" class="brand">
+        <span class="brand-icon">F</span>
+        FixNear<span class="dot">.</span>
+      </a>
+
+      <span class="aside-badge">{{ isProvider ? 'For local professionals' : 'For happy homeowners' }}</span>
+
+      <h2>{{ isProvider ? 'Your next job is closer than you think.' : 'Your home, in good hands.' }}</h2>
+      <p>
+        {{ isProvider
+            ? 'One calm place to run your business — bookings, services, availability and the reviews that win your next customer.'
+            : 'Return to your bookings, saved pros and reviews. Everything you need to keep your home running smoothly.' }}
+      </p>
+
+      <div class="aside-features">
+        <ng-container *ngIf="isProvider; else customerFeatures">
+          <div class="af"><span>✓</span> Win nearby jobs without the guesswork</div>
+          <div class="af"><span>✓</span> Set your services, prices and availability</div>
+          <div class="af"><span>✓</span> Build trust with real customer reviews</div>
+        </ng-container>
+        <ng-template #customerFeatures>
+          <div class="af"><span>✓</span> Book background-checked local pros</div>
+          <div class="af"><span>✓</span> Track every appointment in one place</div>
+          <div class="af"><span>✓</span> Honest prices and real reviews</div>
+        </ng-template>
+      </div>
+
+      <div class="aside-quote">
+        <p>
+          {{ isProvider
+              ? '“FixNear keeps my calendar full and my customers happy. I finally have time to focus on the work I love.”'
+              : '“Found a brilliant electrician in minutes. Clear price, turned up on time, job done beautifully.”' }}
+        </p>
+        <div class="quote-author">
+          <div class="quote-avatar">{{ isProvider ? 'R' : 'S' }}</div>
+          <div>
+            <strong>{{ isProvider ? 'Rahul K.' : 'Sarah M.' }}</strong>
+            <span>{{ isProvider ? 'FixNear provider' : 'Happy customer' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-main">
+    <form class="auth-form" (ngSubmit)="login()">
+      <a routerLink="/" class="mobile-brand">
+        <span class="brand-icon">F</span>
+        FixNear<span class="dot">.</span>
+      </a>
+
+      <div class="form-header">
+        <span class="form-eyebrow">{{ roleEyebrow }}</span>
+        <h1>{{ roleHeadline }}</h1>
+        <p>{{ roleSubline }}</p>
+      </div>
+
+      <div class="role-switch" role="tablist" aria-label="Choose account type">
+        <button type="button" role="tab" class="role-tab"
+                *ngFor="let option of roles"
+                [class.active]="role === option.value"
+                [attr.aria-selected]="role === option.value"
+                [attr.data-role]="option.value"
+                (click)="selectRole(option.value)">
+          <span class="role-icon" aria-hidden="true">{{ option.icon }}</span>
+          <span class="role-text">
+            <strong>{{ option.label }}</strong>
+            <small>{{ option.hint }}</small>
+          </span>
+        </button>
+      </div>
+
+      <div class="role-note" *ngIf="isProvider">
+        <span class="note-spark" aria-hidden="true">✦</span>
+        <span>Providers land in Provider Studio after sign-in — your bookings, services and storefront live there.</span>
+      </div>
+
+      <div class="form-group">
+        <label for="email">{{ emailLabel }}</label>
+        <input id="email" type="email" name="email" [(ngModel)]="email"
+               [placeholder]="isProvider ? 'you@yourbusiness.com' : 'you@example.com'"
+               autocomplete="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="pw-wrap">
+          <input id="password" [type]="showPassword ? 'text' : 'password'" name="password"
+                 [(ngModel)]="password" placeholder="Enter your password"
+                 autocomplete="current-password" required>
+          <button type="button" class="pw-toggle" (click)="showPassword = !showPassword"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                  tabindex="-1">
+            <svg *ngIf="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg *ngIf="showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-error" *ngIf="message">
+        <span>⚠</span> {{ message }}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg submit-btn"
+              [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span>
+        {{ submitLabel }}
+      </button>
+
+      <p class="form-footer">
+        First time at FixNear?
+        <a routerLink="/register">Create your free account</a>
+      </p>
+
+      <div class="form-trust">
+        <span>🔒</span> Secure sign-in · Your details stay private
+      </div>
+    </form>
+  </div>
+</div>
